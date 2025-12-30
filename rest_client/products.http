@@ -1,0 +1,33 @@
+### GET ALL Products
+GET http://localhost:3000/api/products?title=Iphone
+
+
+### GET SINGLE product
+
+GET http://localhost:3000/api/products/5
+
+### Create New Product
+
+POST http://localhost:3000/api/products
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlclR5cGUiOiJhZG1pbiIsImlhdCI6MTc2NzAwOTYzNywiZXhwIjoxNzY3MDk2MDM3fQ.nwPBBXfi-tMLlWB2auFNgVY479JYtQwF2MyDCwP5f7M
+
+{
+    "title":"cooking book",
+    "price": 420,
+    "description": "about this book"
+}
+
+### update Product
+PUT http://localhost:3000/api/products/4
+Content-Type: application/json
+
+{
+    "title":"pen",
+    "price": 150,
+    "description": "about this pen"
+}
+
+### Delete Product
+DELETE http://localhost:3000/api/products/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlclR5cGUiOiJub3JtYWxfdXNlciIsImlhdCI6MTc2NjkyODcxOSwiZXhwIjoxNzY3MDE1MTE5fQ.P-tFNTSJTsThoHXuZfUvskSA_HYevvtREzJE3yfctEc
