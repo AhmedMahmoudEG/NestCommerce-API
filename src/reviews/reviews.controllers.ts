@@ -8,6 +8,7 @@ import {
   Get,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dtos/create-review.dto';
@@ -37,8 +38,11 @@ export class ReviewsController {
   @Get()
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
-  public getAllReviews() {
-    return this.reviewsService.getAllReviews();
+  public getAllReviews(
+    @Query('pageNumber', ParseIntPipe) pageNumber?: number,
+    @Query('reviewPerPage', ParseIntPipe) reviewPerPage?: number,
+  ) {
+    return this.reviewsService.getAllReviews(pageNumber, reviewPerPage);
   }
   //GET : ~/api/reviews/:id
   @Get(':id')

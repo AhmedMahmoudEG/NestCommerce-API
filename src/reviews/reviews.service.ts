@@ -46,16 +46,24 @@ export class ReviewsService {
   }
 
   /**
-   *
+   * get all reviews
+   *@param pageNumber number of page
+   @param reviewPerPage number of review per page
    * @returns all reviews ordered by last one created
    */
-  public async getAllReviews() {
-    return await this.reviewsRepository.find({
+  public async getAllReviews(pageNumber?: number, reviewPerPage?: number) {
+    const result = await this.reviewsRepository.find({
+      skip: pageNumber && reviewPerPage ? (pageNumber - 1) * reviewPerPage : 0,
+      take: reviewPerPage || 0,
       order: {
         createdAt: 'DESC',
       },
       relations: { product: true, user: true },
     });
+    return {
+      count: result.length,
+      reviews: result,
+    };
   }
   //get one review by id
   public async getOneReview(id: number, payload: types.JWTPayloadType) {
