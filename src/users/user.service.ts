@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { RegisterDto } from './dtos/register.dto';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -9,6 +13,8 @@ import { AccessTokenType, JWTPayloadType } from '../utlis/types';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserType } from '../utlis/enums';
 import { AuthProvider } from './auth.provider';
+import { join } from 'node:path';
+import { unlinkSync } from 'node:fs';
 
 @Injectable()
 export class UserService {
@@ -79,5 +85,39 @@ export class UserService {
     if (userId === payload?.id || payload.userType === UserType.ADMIN)
       await this.userRepository.remove(user);
     return { message: 'User has been deleted!' };
+  }
+  /**
+   * set profile image
+   * @param userId id of logged in user
+   * @param newProfileImage Profile image
+   * @returns saved user
+   */
+  public async setProfileImage(userId: number, newProfileImage: string) {
+    const user = await this.getCurrentUser(userId);
+    if (user.profileImage == '') {
+      user.profileImage = newProfileImage;
+    } else {
+      await this.deleteProfileImage(userId);
+      user.profileImage = newProfileImage;
+    }
+    return this.userRepository.save(user);
+  }
+  /**
+   * delete profile image
+   * @param userId id of logged in user
+   * @returns the  user from database
+   */
+  public async deleteProfileImage(userId: number) {
+    const user = await this.getCurrentUser(userId);
+    if (!user.profileImage) throw new BadRequestException('No profile image');
+    //delete the image from file system
+    const imagePath = join(
+      process.cwd(),
+      `./images/users/${user.profileImage}`,
+    );
+    unlinkSync(imagePath);
+    //delete the image from db
+    user.profileImage = '';
+    return this.userRepository.save(user);
   }
 }

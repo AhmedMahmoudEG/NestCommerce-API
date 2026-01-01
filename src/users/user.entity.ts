@@ -36,6 +36,8 @@ export class User {
     onUpdate: CURRENT_TIMESTAMP,
   })
   updatedAt: Date;
+  @Column({ nullable: true, default: null })
+  profileImage: string;
   //function that return product, product object that return
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
