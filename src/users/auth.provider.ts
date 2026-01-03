@@ -8,6 +8,7 @@ import { LoginDto } from './dtos/login.dto';
 import { AccessTokenType, JWTPayloadType } from '../utlis/types';
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthProvider {
@@ -15,6 +16,7 @@ export class AuthProvider {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
   /**
    * creating new user
@@ -60,6 +62,7 @@ export class AuthProvider {
       id: user.id,
       userType: user.userType,
     });
+    await this.mailService.sendLoginEmail(user.email);
     return { accessToken };
   }
 

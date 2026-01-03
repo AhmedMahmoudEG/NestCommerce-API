@@ -9,16 +9,18 @@ import { Review } from './reviews/reviews.entity';
 import { User } from './users/user.entity';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UploadModule } from './uploads/uploads.module';
+import { MailModule } from './mail/mail.module';
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
+    }),
     ProductsModule,
     UsersModule,
     ReviewsModule,
     UploadModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-    }),
+    MailModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {

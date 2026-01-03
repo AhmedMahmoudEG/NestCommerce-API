@@ -26,7 +26,6 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { AuthRolesGuard } from './guards/auth-roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile, UseInterceptors } from '@nestjs/common';
-import { diskStorage } from 'multer';
 import type { Express, Response } from 'express';
 @Controller('api/users')
 export class UserController {
@@ -82,27 +81,7 @@ export class UserController {
   //POST :api/users/upload-image
   @Post('upload-image')
   @UseGuards(AuthGuard)
-  @UseInterceptors(
-    FileInterceptor('user-image', {
-      storage: diskStorage({
-        destination: './images/users',
-        filename: (req, file, cb) => {
-          const prefix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          cb(null, `${prefix}-${file.originalname}`);
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image')) {
-          cb(null, true);
-        } else {
-          cb(new BadRequestException('unsupported file format'), false);
-        }
-      },
-      limits: {
-        fileSize: 1024 * 1024,
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor('user-image'))
   public uploadProfileImage(
     @UploadedFile() file: Express.Multer.File,
     @CurrentUser() payload: types.JWTPayloadType,
