@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from './mail.service';
-
+import { join } from 'node:path';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 @Module({
   imports: [
     MailerModule.forRootAsync({
@@ -18,6 +19,12 @@ import { MailService } from './mail.service';
               pass: config.get('SMTP_PASSWORD'),
             },
             secure: false, //https false in dev, true in production
+          },
+          template: {
+            dir: join(__dirname, './templates'),
+            adapter: new EjsAdapter({
+              inlineCssEnabled: true,
+            }),
           },
         };
       },
