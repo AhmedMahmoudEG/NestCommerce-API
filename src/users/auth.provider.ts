@@ -9,6 +9,8 @@ import { AccessTokenType, JWTPayloadType } from '../utlis/types';
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from '../mail/mail.service';
+import { randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthProvider {
@@ -17,15 +19,15 @@ export class AuthProvider {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly config: ConfigService,
   ) {}
   /**
    * creating new user
    * @param registerDto data for creating a new user
    * @returns jwt (access token)
    */
-  public async register(registerDto: RegisterDto): Promise<AccessTokenType> {
+  public async register(registerDto: RegisterDto) {
     const { email, password, username } = registerDto;
-
     const userFromDb = await this.userRepository.findOne({
       where: { email },
     });
@@ -34,15 +36,12 @@ export class AuthProvider {
       email,
       password: await this.hashPassword(password),
       username,
+      verificationToken: randomBytes(32).toString('hex'),
     });
     newUser = await this.userRepository.save(newUser);
-    //ToDo --> Generate JWT Token
-    const payload: JWTPayloadType = {
-      id: newUser.id,
-      userType: newUser.userType,
-    };
-    const accessToken = await this.generateJWT(payload);
-    return { accessToken };
+    const link = `${this.config.get<string>('DOMAIN')}/api/users/verify-email/${newUser.id}/${newUser.verificationToken}`;
+    await this.mailService.sendVerifyEmailTemplate(email, link);
+    return { message: 'Verification token has been sent to your email' };
   }
   /**
    * Log in User
@@ -57,7 +56,6 @@ export class AuthProvider {
     const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch) throw new BadRequestException('Invalid password');
     //todo-> Generate JWT Token
-
     const accessToken = await this.generateJWT({
       id: user.id,
       userType: user.userType,

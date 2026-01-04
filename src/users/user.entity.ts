@@ -28,6 +28,8 @@ export class User {
   userType: UserType;
   @Column({ default: false })
   isVerified: boolean;
+  @Column({ nullable: true })
+  verificationToken: string;
   @CreateDateColumn({ type: 'timestamp', default: () => CURRENT_TIMESTAMP })
   createdAt: Date;
   @UpdateDateColumn({

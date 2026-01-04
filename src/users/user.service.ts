@@ -28,7 +28,7 @@ export class UserService {
    * @param registerDto data for creating a new user
    * @returns jwt (access token)
    */
-  public async register(registerDto: RegisterDto): Promise<AccessTokenType> {
+  public async register(registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
   /**
@@ -119,5 +119,22 @@ export class UserService {
     //delete the image from db
     user.profileImage = '';
     return this.userRepository.save(user);
+  }
+  /**
+   * Verify Email
+   * @param id id of the user from link
+   * @param verificationToken verification token from the link
+   * @returns success message
+   */
+  public async verifyEmail(id: number, verificationToken: string) {
+    const user = await this.getCurrentUser(id);
+    if (user.verificationToken == null)
+      throw new NotFoundException('there is no verification token');
+    if (user.verificationToken !== verificationToken)
+      throw new BadRequestException('Invalid link');
+    user.isVerified = true;
+    user.verificationToken = '';
+    await this.userRepository.save(user);
+    return { message: 'Your Email has been verified, you can now login' };
   }
 }

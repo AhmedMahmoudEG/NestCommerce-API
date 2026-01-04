@@ -1,4 +1,8 @@
-import { Injectable, RequestTimeoutException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -25,6 +29,27 @@ export class MailService {
     } catch (error) {
       console.log(error);
       throw new RequestTimeoutException('email not sent');
+    }
+  }
+
+  /**
+   * sending verify email template
+   * @param email email of regisiterd  user
+   * @param link link with id of user and verification token
+   */
+  public async sendVerifyEmailTemplate(email: string, link: string) {
+    try {
+      const appName = 'my-nestjs-app';
+      await this.mailerService.sendMail({
+        to: email,
+        from: '<no-reply>@my-nestjs-app.com',
+        subject: 'Verify Your Account',
+        template: 'verify-email',
+        context: { link, appName },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new ForbiddenException('email not sent');
     }
   }
 }
