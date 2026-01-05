@@ -9,7 +9,7 @@ import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginDto } from './dtos/login.dto';
 
-import { AccessTokenType, JWTPayloadType } from '../utlis/types';
+import { JWTPayloadType } from '../utlis/types';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserType } from '../utlis/enums';
 import { AuthProvider } from './auth.provider';
@@ -36,7 +36,7 @@ export class UserService {
    * @param loginDto data for log in to user account
    * @returns JWT token
    */
-  public async login(loginDto: LoginDto): Promise<AccessTokenType> {
+  public async login(loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
   /**
