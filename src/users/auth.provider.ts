@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dtos/register.dto';
 import * as bcrypt from 'bcryptjs';
@@ -9,8 +9,9 @@ import { JWTPayloadType } from '../utlis/types';
 import { BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from '../mail/mail.service';
-import { randomBytes } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Injectable()
 export class AuthProvider {
@@ -59,7 +60,9 @@ export class AuthProvider {
       let verificationToken = user.verificationToken;
       if (!verificationToken) {
         verificationToken = randomBytes(32).toString('hex');
-        user.verificationToken = verificationToken;
+        user.verificationToken = createHash('sha256')
+          .update(verificationToken)
+          .digest('hex');
         await this.userRepository.save(user);
       }
       const link = this.generateLink(user.id, verificationToken);
@@ -74,7 +77,62 @@ export class AuthProvider {
     await this.mailService.sendLoginEmail(user.email);
     return { accessToken };
   }
+  /**
+   * sending reset password link to the client
+   * @param email email of user
+   */
+  public async sendingResetPasswordLink(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
 
+    if (!user) {
+      return { message: 'If the email exists, a reset link has been sent' };
+    }
+
+    // ALWAYS generate a new token
+    const resetToken = randomBytes(32).toString('hex');
+    const hashedToken = createHash('sha256').update(resetToken).digest('hex');
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.userRepository.save(user);
+
+    // SEND RAW TOKEN ONLY
+    const link = `${this.config.get<string>('CLIENT_DOMAIN')}/reset-password?id=${user.id}&token=${resetToken}`;
+
+    await this.mailService.sendResetPasswordTemplate(user.email, link);
+
+    return { message: 'Reset password link has been sent to your email' };
+  }
+
+  /**
+   * Reset the password
+   */
+  public async resetPassword(dto: ResetPasswordDto) {
+    const { userId, resetPasswordToken, newPassword } = dto;
+    const hashedToken = createHash('sha256')
+      .update(resetPasswordToken)
+      .digest('hex');
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId,
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: MoreThan(new Date()),
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+    user.password = await this.hashPassword(newPassword);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await this.userRepository.save(user);
+    await this.mailService.sendPasswordChangedTemplate(
+      user.email,
+      user.username,
+    );
+    return { message: 'Password has been reset successfully' };
+  }
   /**
    * Hashing password
    * @param password plain text password

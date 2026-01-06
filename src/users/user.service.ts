@@ -15,6 +15,7 @@ import { UserType } from '../utlis/enums';
 import { AuthProvider } from './auth.provider';
 import { join } from 'node:path';
 import { unlinkSync } from 'node:fs';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 
 @Injectable()
 export class UserService {
@@ -136,5 +137,21 @@ export class UserService {
     user.verificationToken = '';
     await this.userRepository.save(user);
     return { message: 'Your Email has been verified, you can now login' };
+  }
+  /**
+   * Send reset password template
+   * @param email email of user
+   * @returns a success message
+   */
+  public async sendResetPassword(email: string) {
+    return this.authService.sendingResetPasswordLink(email);
+  }
+  /**
+   * reset password
+   * @param dto dto of new password
+   * @returns a success message
+   */
+  public async resetPassword(dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

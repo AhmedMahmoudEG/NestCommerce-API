@@ -23,3 +23,22 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlclR5c
 ### get all user
 GET http://localhost:3000/api/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NC
+
+
+### Forget Password
+POST http://localhost:5000/api/users/forgot-password
+Content-Type: application/json
+
+{
+    "email":"ahmad98@example.com"
+}
+
+### Reset Password
+POST http://localhost:5000/api/users/reset-password
+Content-Type: application/json
+
+{   "userId": 3,
+    "resetPasswordToken":"042c7c2e8043b321116cd1ed30fd3460f8169fef012c78e5215a8159d9082afd",
+    "newPassword": "fortesting"
+}
+

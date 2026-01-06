@@ -52,4 +52,46 @@ export class MailService {
       throw new ForbiddenException('email not sent');
     }
   }
+
+  /**
+   * reset password template email
+   * @param email email of user
+   * @param resetPasswordlink link of reset password
+   */
+  public async sendResetPasswordTemplate(
+    email: string,
+    resetPasswordLink: string,
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        from: '<no-reply>@my-nestjs-app.com',
+        subject: 'Reset Your Password',
+        template: 'reset-password',
+        context: { resetPasswordLink },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new ForbiddenException('email not sent');
+    }
+  }
+  /**
+   * verify password changed email
+   * @param email email of user
+   * @param username username of user
+   */
+  public async sendPasswordChangedTemplate(email: string, username: string) {
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        from: '<no-reply>@my-nestjs-app.com',
+        subject: 'Your Password has been changed',
+        template: 'password-changed',
+        context: { username },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new ForbiddenException('email not sent');
+    }
+  }
 }

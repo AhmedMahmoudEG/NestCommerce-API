@@ -27,6 +27,8 @@ import { AuthRolesGuard } from './guards/auth-roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile, UseInterceptors } from '@nestjs/common';
 import type { Express, Response } from 'express';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 @Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -110,5 +112,18 @@ export class UserController {
     @Param('verificationToken') verificationToken: string,
   ) {
     return this.userService.verifyEmail(id, verificationToken);
+  }
+
+  //POST ~api/users/forgot-password/
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  public forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.userService.sendResetPassword(body.email);
+  }
+  //POST ~api/users/reset-password/
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  public resetPassword(@Body() body: ResetPasswordDto) {
+    return this.userService.resetPassword(body);
   }
 }
