@@ -83,25 +83,18 @@ export class AuthProvider {
    */
   public async sendingResetPasswordLink(email: string) {
     const user = await this.userRepository.findOne({ where: { email } });
-
     if (!user) {
       return { message: 'If the email exists, a reset link has been sent' };
     }
-
     // ALWAYS generate a new token
     const resetToken = randomBytes(32).toString('hex');
     const hashedToken = createHash('sha256').update(resetToken).digest('hex');
-
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
-
     await this.userRepository.save(user);
-
     // SEND RAW TOKEN ONLY
     const link = `${this.config.get<string>('CLIENT_DOMAIN')}/reset-password?id=${user.id}&token=${resetToken}`;
-
     await this.mailService.sendResetPasswordTemplate(user.email, link);
-
     return { message: 'Reset password link has been sent to your email' };
   }
 
