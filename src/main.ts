@@ -16,6 +16,12 @@ async function bootstrap() {
     .addServer('http://localhost:5000')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .setVersion('1.0')
+    .addSecurity('bearer', {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+    })
+    .addBearerAuth()
     .build();
   const documentation = SwaggerModule.createDocument(app, swagger);
   SwaggerModule.setup('swagger', app, documentation);

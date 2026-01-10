@@ -18,6 +18,7 @@ import { Roles } from '../users/decorators/user-role.decorator';
 import { UserType } from '../utlis/enums';
 import * as types from '../utlis/types';
 import { UpdateReviewDto } from './dtos/update-review.dto';
+import { ApiSecurity, ApiQuery } from '@nestjs/swagger';
 
 @Controller('api/reviews')
 export class ReviewsController {
@@ -26,6 +27,9 @@ export class ReviewsController {
   @Post(':productId')
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.NORMAL_USER, UserType.ADMIN)
+  @ApiSecurity('bearer')
+  @ApiQuery({ name: 'pageNumber', required: false })
+  @ApiQuery({ name: 'reviewPerPage', required: false })
   public createNewReview(
     @Body() body: CreateReviewDto,
     @Param('productId', ParseIntPipe) productId: number,
@@ -38,6 +42,9 @@ export class ReviewsController {
   @Get()
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN)
+  @ApiQuery({ name: 'pageNumber', required: false })
+  @ApiQuery({ name: 'reviewPerPage', required: false })
+  @ApiSecurity('bearer')
   public getAllReviews(
     @Query('pageNumber', ParseIntPipe) pageNumber?: number,
     @Query('reviewPerPage', ParseIntPipe) reviewPerPage?: number,
@@ -48,6 +55,7 @@ export class ReviewsController {
   @Get(':id')
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN, UserType.NORMAL_USER)
+  @ApiSecurity('bearer')
   public getOneReview(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() payload: types.JWTPayloadType,
@@ -58,6 +66,7 @@ export class ReviewsController {
   @Put(':id')
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN, UserType.NORMAL_USER)
+  @ApiSecurity('bearer')
   public updateReview(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateReviewDto,
@@ -69,6 +78,7 @@ export class ReviewsController {
   @UseGuards(AuthRolesGuard)
   @Roles(UserType.ADMIN, UserType.NORMAL_USER)
   @Delete(':id')
+  @ApiSecurity('bearer')
   public deleteReview(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() payload: types.JWTPayloadType,

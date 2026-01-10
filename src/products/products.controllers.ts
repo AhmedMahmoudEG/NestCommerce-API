@@ -19,7 +19,7 @@ import { UserType } from '../utlis/enums';
 import { Roles } from '../users/decorators/user-role.decorator';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
 import * as types from '../utlis/types';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiQuery, ApiSecurity } from '@nestjs/swagger';
 
 @Controller('/api/products')
 export class ProductController {
@@ -71,6 +71,7 @@ export class ProductController {
   @Put('/:id')
   @Roles(UserType.ADMIN)
   @UseGuards(AuthRolesGuard)
+  @ApiSecurity('bearer')
   public updateProduct(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateProductDto,
@@ -82,6 +83,7 @@ export class ProductController {
   @Delete('/:id')
   @Roles(UserType.ADMIN)
   @UseGuards(AuthRolesGuard)
+  @ApiSecurity('bearer')
   public deleteProduct(@Param('id') id: number) {
     return this.productService.deleteOne(id);
   }

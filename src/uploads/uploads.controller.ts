@@ -11,11 +11,19 @@ import {
 } from '@nestjs/common';
 import type { Express, Response } from 'express';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesUploadDto } from './dtos/files-upload.dto';
+import { ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ImageUploadDto } from './dtos/file-upload.dto';
 @Controller('api/uploads')
 export class UploadController {
   //POST ~ api/uploads/multiple-files'
   @Post('multiple-files')
   @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: FilesUploadDto,
+    description: 'multiple files',
+  })
   public UploadMultiplesFiles(
     @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
@@ -27,6 +35,11 @@ export class UploadController {
   //POST ~ api/uploads
   @Post()
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: ImageUploadDto,
+    description: 'image',
+  })
   public UploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('no file Provided');
     console.log('File Uploaded!', { file });
