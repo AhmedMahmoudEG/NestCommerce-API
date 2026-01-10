@@ -1,4 +1,10 @@
-import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { ReviewsModule } from './reviews/reviews.module';
@@ -10,6 +16,7 @@ import { User } from './users/user.entity';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UploadModule } from './uploads/uploads.module';
 import { MailModule } from './mail/mail.module';
+import { LoggerMiddleware } from './utlis/middlewares/logger.middleware';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -41,4 +48,13 @@ import { MailModule } from './mail/mail.module';
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes(
+        { path: 'api/products', method: RequestMethod.GET },
+        { path: 'api/products/:id', method: RequestMethod.GET },
+      );
+  }
+}
